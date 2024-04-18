@@ -10,8 +10,30 @@ export default class App extends Component {
 
   state = {
     inputReceita: '',
-    receitas: [],
-    receitasFilter: [{id: 0, nome: 'Bolo de Banana', data: '2024-04-17'}, {id: 1, nome: 'Pudim', data: '2024-04-20'}]
+    receitas: [{id: 1, nome: 'Bolo de Banana', data: '2024-04-17'}, {id: 2, nome: 'Pudim', data: '2024-04-20'}],
+    receitasFilter: []
+  }
+
+  setInputReceita = async (inputReceita) => {
+    await this.setState({ inputReceita })
+    this.localizarRegistros()
+  }
+
+  setReceitas = (receitas) => {
+    this.setState({ receitas })
+  }
+
+  setReceitasFilter = (receitasFilter) => {
+    this.setState({ receitasFilter })
+  }
+
+  localizarRegistros = () => {
+    
+    let receitasFilter = []
+    this.setReceitas(this.state.receitas) // Será a seleção do DB
+    receitasFilter = this.state.receitas.filter(receita => receita.nome.toLowerCase().includes(this.state.inputReceita.toLowerCase()))
+    this.setReceitasFilter(receitasFilter)
+
   }
 
   getItem = ({ item: receita }) => {
@@ -21,7 +43,7 @@ export default class App extends Component {
 
        key={receita.id} 
         bottomDivider 
-        //onPress={() => this.props.navigation.navigate('LocCadastro', { user: user, view: 'ListaCad' } )} 
+        onPress={() => this.props.navigation.navigate('Receita', { receita: receita, view: 'Home' } )} 
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1 }}>
           <Avatar source={{uri: 'https://cdn.pixabay.com/photo/2024/03/05/18/43/taco-8615083_1280.png'}} />  
           
@@ -34,6 +56,10 @@ export default class App extends Component {
         </ListItem>
       
     )
+  }
+
+  componentDidMount() {
+    this.localizarRegistros()
   }
 
   render() {
@@ -55,7 +81,7 @@ export default class App extends Component {
                   placeholder="Buscar Receita..."
                   style={{fontSize: 16}}
                   value={this.state.inputReceita}
-                  onChangeText={(inputReceita) => this.setState({ inputReceita })}
+                  onChangeText={this.setInputReceita}
                 />
               </TouchableOpacity>
               <Ionicons name="search" size={25} style={{paddingTop: 11}} color='black'/> 
@@ -95,7 +121,7 @@ export default class App extends Component {
           { /*  Botão de Adicionar */ }
           <TouchableOpacity style={[styleApp.addButton]}
             activeOpacity={0.7}
-            onPress={() => this.setState( {showAddTask: true} )}>
+            onPress={() => this.props.navigation.navigate('Receita', { view: 'Home' } )} >
             <Ionicons name="add" size={35} color={'black'} />
           </TouchableOpacity>
 
