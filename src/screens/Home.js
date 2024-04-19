@@ -122,7 +122,7 @@ export default class App extends Component {
           <TouchableOpacity style={[styleApp.addButton]}
             activeOpacity={0.7}
             onPress={() => this.props.navigation.navigate('Receita', { view: 'Home' } )} >
-            <Ionicons name="add" size={35} color={'black'} />
+            <Ionicons name="add" size={35} color={'white'} />
           </TouchableOpacity>
 
 
@@ -190,9 +190,7 @@ const styleApp = StyleSheet.create({
       borderRadius: 25,
       justifyContent: 'center',
       alignItems: 'center' ,
-      backgroundColor: 'white',
-      //borderColor: '#65A8F0',
-      //borderWidth: 1
+      backgroundColor: '#ECA457',
   }
 
 })
