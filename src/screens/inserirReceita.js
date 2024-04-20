@@ -1,14 +1,25 @@
 import React, {Component} from 'react'
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image, KeyboardAvoidingView, FlatList } from 'react-native'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
+
+import AddCategoria from '../components/AddCategoria'
 
 
 export default class App extends Component {
 
   state = {
     inputReceita: '',
+    showAddCategoria: false
+  }
+
+  setInputReceita = (inputReceita) => {
+    this.setState({ inputReceita })
+  }
+
+  addTask = () => {
+    console.log('entrou')
   }
 
   componentDidMount() {
@@ -20,62 +31,90 @@ export default class App extends Component {
 
       <SafeAreaView style={styleApp.app}>
 
-        <View style={styleApp.appMain}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
 
-          { /* Imagem superior */ }
-          <View style={styleApp.imagem}>
-            <Image source={imagem} style={styleApp.image}/>
+             <AddCategoria isVisible={this.state.showAddCategoria} 
+                    onCancel={() => this.setState({ showAddCategoria: false }) }
+                    onSave={this.addTask} />
 
-          </View>
+          <View style={styleApp.appMain}>
 
-          { /* Input para inserir nome da receita */ }
-          <View>
+            { /* Imagem superior */ }
+            <View style={styleApp.imagem}>
+              <Image source={imagem} style={styleApp.image}/>
 
-            <View style={styleApp.input}> 
-                <Text style={styleApp.inputDesc}> Digite o </Text>
-                <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>nome </Text>
-                <Text style={styleApp.inputDesc}>da sua </Text>
-                <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>receita </Text>
             </View>
 
-            <View style={{alignItems: 'center', paddingTop: 10}}> 
-                <View style={styleApp.inputNomeReceita}>
-                    <TouchableOpacity>
-                        <TextInput 
-                            placeholder="Insira o nome aqui"
-                            style={{fontSize: 16}}
-                            value={this.state.inputNomeReceita}
-                            onChangeText={this.setInputReceita}
-                        />
-                    </TouchableOpacity>
-                </View>
+            { /* Input para inserir nome da receita */ }
+            <View>
+
+              <View style={styleApp.input}> 
+                  <Text style={styleApp.inputDesc}> Digite o </Text>
+                  <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>nome </Text>
+                  <Text style={styleApp.inputDesc}>da sua </Text>
+                  <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>receita </Text>
+              </View>
+
+              <View style={{alignItems: 'center', paddingTop: 10}}> 
+                  <View style={styleApp.inputNomeReceita}>
+                      <TouchableOpacity>
+                          <TextInput 
+                              placeholder="Insira o nome aqui"
+                              style={{fontSize: 16}}
+                              value={this.state.inputReceita}
+                              onChangeText={this.setInputReceita}
+                          />
+                      </TouchableOpacity>
+                  </View>
+              </View>
+
             </View>
 
+            { /* Escolha da categoria */ }
+
+            <View>
+
+              <View style={styleApp.input}>
+                <Text style={styleApp.inputDesc}> Escolha uma </Text>
+                <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>categoria </Text>
+              </View>
+
+              <View style={{alignItems: 'center', paddingTop: 10}}> 
+                    <View style={styleApp.inputCatReceita}>
+                        <TouchableOpacity
+                          onPress={() => this.setState({ showAddCategoria: true })} >
+                            { /* COPIAR O MODAL DO PROJETO DE TASKS, VAI SER NAQUELE MESMO ESTILO */ }
+
+                            <Text style={{fontSize: 16}}> Selecione aqui a categoria </Text>
+
+                        </TouchableOpacity>
+                        <Ionicons name="search" size={25} style={{paddingLeft: 10}} color='black'/> 
+                    </View>
+                    
+              </View>
+
+            </View>
+
+
+            { /*  Botões de navegação */ }
+            <TouchableOpacity style={[styleApp.backButton]}
+              activeOpacity={0.7}
+              onPress={() => this.props.navigation.goBack()} >
+              <Ionicons name="arrow-back" size={30} color={'white'} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styleApp.addButton]}
+              activeOpacity={0.7}
+              onPress={() => this.props.navigation.navigate('Receita', { view: 'Home' } )} >
+              <Ionicons name="arrow-forward" size={30} color={'white'} />
+            </TouchableOpacity>
+
+
           </View>
-
-          { /* Escolha da categoria */ }
-
-          <View style={styleApp.input}>
-             <Text style={styleApp.inputDesc}> Escolha uma </Text>
-             <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>categoria </Text>
-          </View>
-
-
-          { /*  Botões de navegação */ }
-          <TouchableOpacity style={[styleApp.backButton]}
-            activeOpacity={0.7}
-            onPress={() => this.props.navigation.goBack()} >
-            <Ionicons name="arrow-back" size={30} color={'white'} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styleApp.addButton]}
-            activeOpacity={0.7}
-            onPress={() => this.props.navigation.navigate('Receita', { view: 'Home' } )} >
-            <Ionicons name="arrow-forward" size={30} color={'white'} />
-          </TouchableOpacity>
-
-
-        </View>
+        
+        </KeyboardAvoidingView>
       
       </SafeAreaView>
 
@@ -133,6 +172,17 @@ const styleApp = StyleSheet.create({
     borderRadius: 7,
     paddingHorizontal: 20,
     alignItems: 'center',
+  },
+
+  inputCatReceita: {
+    width: '80%' ,
+    height: 50,
+    backgroundColor: 'white',
+    borderRadius: 7,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center'
   },
 
   backButton: {
