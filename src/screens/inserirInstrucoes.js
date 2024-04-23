@@ -5,12 +5,11 @@ import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dime
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
 
-import AddCategoria from '../components/AddCategoria'
-import AddIngrediente from '../components/AddIngrediente'
+import AddInstrucao from '../components/AddInstrucao'
 
 const initialState = { 
-  inputIngrediente: '',
-  ingredientes: [''],
+  inputInstrucao: '',
+  instrucoes: [''],
   isKeyboardOpen: false,
 }
 
@@ -20,21 +19,21 @@ export default class App extends Component {
     ...initialState
   }
 
-  setInputIngrediente = (inputIngrediente) => {
-    this.setState({ inputIngrediente })
+  setInputIntrucao = (inputInstrucao) => {
+    this.setState({ inputInstrucao })
   }
 
-  setIngredientes = (valor, indice) => {
+  setInstrucao = (valor, indice) => {
     
-    let ingredientes = this.state.ingredientes
-    ingredientes[indice] = valor
-    console.log(ingredientes[indice + 1])
-    if (!ingredientes[indice + 1]) {
-      ingredientes[indice+1] = ''
+    let instrucoes = this.state.instrucoes
+    instrucoes[indice] = valor
+    console.log(instrucoes[indice + 1])
+    if (!instrucoes[indice + 1]) {
+      instrucoes[indice+1] = ''
     }
-    this.setState({ ingredientes })
+    this.setState({ instrucoes })
 
-    console.log(this.state.ingredientes)
+    console.log(this.state.instrucoes)
   }
 
   setKeyboardOn = () => {
@@ -45,10 +44,10 @@ export default class App extends Component {
     this.setState({ isKeyboardOpen: false });
   };
 
-  addIngrediente() {
-    let ingredientes = this.state.ingredientes
-    ingredientes.push('')
-    this.setState({ ingredientes })
+  addInstrucao() {
+    let instrucoes = this.state.instrucoes
+    instrucoes.push('')
+    this.setState({ instrucoes })
   }
 
   componentDidMount() {
@@ -86,17 +85,17 @@ export default class App extends Component {
               <View style={{flex: 1}}>
 
                 <View style={styleApp.input}>
-                  <Text style={styleApp.inputDesc}> Quais são os </Text>
-                  <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>ingredientes </Text>
+                  <Text style={styleApp.inputDesc}> Digite o </Text>
+                  <Text style={[styleApp.inputDesc, {color: '#ECA457'} ]}>modo de preparo </Text>
                 </View>
 
                 <View style={{flex: 1}}>
-                  {this.state.ingredientes.map((ingrediente, index) => (
-                    <AddIngrediente
+                  {this.state.instrucoes.map((instrucao, index) => (
+                    <AddInstrucao
                       key={index}
-                      valor={ingrediente}
+                      valor={instrucao}
                       indice={index}
-                      funcao={this.setIngredientes}
+                      funcao={this.setInstrucao}
                       onChange={(valor) => handleChange(valor, index)}
                     />
                   ))}
@@ -119,8 +118,9 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.addButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Instrucao', { view: 'Ingrediente' } )} >
-                <Ionicons name="arrow-forward" size={30} color={'white'} />
+                //onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Ingrediente' } )}
+                >
+                <Text style={{color: 'white', fontWeight: 'bold', fontSize: 17}}> Salvar </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -190,9 +190,9 @@ const styleApp = StyleSheet.create({
     position: 'absolute',
     right: 30,
     bottom: 30,
-    width: 50,
+    width: 90,
     height: 50,
-    borderRadius: 25,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center' ,
     backgroundColor: '#ECA457',
