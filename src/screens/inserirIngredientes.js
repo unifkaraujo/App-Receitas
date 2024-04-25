@@ -9,32 +9,30 @@ import AddCategoria from '../components/AddCategoria'
 import AddIngrediente from '../components/AddIngrediente'
 
 const initialState = { 
-  inputIngrediente: '',
-  ingredientes: [''],
   isKeyboardOpen: false,
 }
 
 export default class App extends Component {
 
   state = {
-    ...initialState
+    ...initialState,
+    ingredientes: this.props.route.params.ingredienteArray ? this.props.route.params.ingredienteArray : [{'valor': '', 'id': 0}],
+    id: this.props.route.params.idIng ? this.props.route.params.idIng : 0
   }
 
-  setInputIngrediente = (inputIngrediente) => {
-    this.setState({ inputIngrediente })
-  }
 
   setIngredientes = (valor, indice) => {
     
     let ingredientes = this.state.ingredientes
-    ingredientes[indice] = valor
-    console.log(ingredientes[indice + 1])
+    ingredientes[indice].valor = valor
     if (!ingredientes[indice + 1]) {
-      ingredientes[indice+1] = ''
+      const id = this.state.id + 1
+      ingredientes[indice+1] = {'valor': '', 'id': id}
+      this.setState({ id })
     }
+    
     this.setState({ ingredientes })
 
-    console.log(this.state.ingredientes)
   }
 
   setKeyboardOn = () => {
@@ -45,14 +43,16 @@ export default class App extends Component {
     this.setState({ isKeyboardOpen: false });
   };
 
-  addIngrediente() {
-    let ingredientes = this.state.ingredientes
-    ingredientes.push('')
-    this.setState({ ingredientes })
+  delIngrediente = async (indice) => {
+    let ingredientes = this.state.ingredientes.slice(); // Criando uma cópia do array
+    ingredientes.splice(indice, 1);
+
+    await this.setState({ ingredientes })
+
   }
 
-  componentDidMount() {
 
+  componentDidMount() {
 
     /* Usando uma solução ruim, pois foi a unica que consegui */
     /* Basicamente vamos monitorar o teclado, se ligado, oculta botões /*/
@@ -93,10 +93,11 @@ export default class App extends Component {
                 <View style={{flex: 1}}>
                   {this.state.ingredientes.map((ingrediente, index) => (
                     <AddIngrediente
-                      key={index}
-                      valor={ingrediente}
+                      key={ingrediente.id}
+                      valor={ingrediente.valor}
                       indice={index}
                       funcao={this.setIngredientes}
+                      deletar={this.delIngrediente}
                       onChange={(valor) => handleChange(valor, index)}
                     />
                   ))}
@@ -111,7 +112,7 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.goBack()} >
+                onPress={() => this.props.navigation.navigate('Receita', { view: 'Ingrediente', instrucaoArray: this.props.route.params.instrucaoArray, ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, idIng: this.state.id } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -119,7 +120,7 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.addButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Instrucao', { view: 'Ingrediente' } )} >
+                onPress={() => this.props.navigation.navigate('Instrucao', { view: 'Ingrediente', instrucaoArray: this.props.route.params.instrucaoArray, ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, idIng: this.state.id  } )} >
                 <Ionicons name="arrow-forward" size={30} color={'white'} />
               </TouchableOpacity>
             )}

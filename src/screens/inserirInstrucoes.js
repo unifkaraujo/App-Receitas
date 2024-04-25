@@ -9,14 +9,15 @@ import AddInstrucao from '../components/AddInstrucao'
 
 const initialState = { 
   inputInstrucao: '',
-  instrucoes: [''],
-  isKeyboardOpen: false,
+  isKeyboardOpen: false
 }
 
 export default class App extends Component {
 
   state = {
-    ...initialState
+    ...initialState,
+    instrucoes: this.props.route.params.instrucaoArray ? this.props.route.params.instrucaoArray : [{'valor': '', 'id': 0, 'cont': 0}],
+    id: this.props.route.params.id ? this.props.route.params.id : 0
   }
 
   setInputIntrucao = (inputInstrucao) => {
@@ -26,14 +27,14 @@ export default class App extends Component {
   setInstrucao = (valor, indice) => {
     
     let instrucoes = this.state.instrucoes
-    instrucoes[indice] = valor
-    console.log(instrucoes[indice + 1])
+    instrucoes[indice].valor = valor
     if (!instrucoes[indice + 1]) {
-      instrucoes[indice+1] = ''
+      const id = this.state.id + 1
+      const cont = instrucoes.length;
+      instrucoes[indice+1] = {'valor': '', 'id': id, 'cont': cont}
+      this.setState({ id })
     }
     this.setState({ instrucoes })
-
-    console.log(this.state.instrucoes)
   }
 
   setKeyboardOn = () => {
@@ -42,16 +43,42 @@ export default class App extends Component {
   
   setKeyboardOff = () => {
     this.setState({ isKeyboardOpen: false });
-  };
+  }
 
-  addInstrucao() {
-    let instrucoes = this.state.instrucoes
-    instrucoes.push('')
-    this.setState({ instrucoes })
+  delInstrucao = async (indice) => {
+    let instrucoes = this.state.instrucoes.slice(); // Criando uma cópia do array
+    instrucoes.splice(indice, 1);
+
+    // Reindexar os IDs
+    let instrucoesReindexado = instrucoes
+
+    await this.setState({ instrucoes : instrucoesReindexado })
+
+    // Tentar arrumar essa parte, preciso resetar os id's para exibir o # correto 
+    // se não der certo, mantenho o array normal e tento outra solucao na proxima aba
+
+    this.indexaarray(instrucoesReindexado)
+
+  }
+
+  indexaarray = async (instrucoesReindexado) => {
+
+    let num = 0;
+    instrucoesReindexado = instrucoesReindexado.map((instrucao, index) => {
+      num++;
+      return { cont: num - 1, id: instrucao.id, valor: instrucao.valor };
+    });
+
+    await this.setState({ instrucoes : instrucoesReindexado })
+
   }
 
   componentDidMount() {
 
+    /*
+    if (this.props.route.params.instrucaoArray) {
+      this.setState({ instrucoes : this.props.route.params.instrucaoArray })
+    }*/
 
     /* Usando uma solução ruim, pois foi a unica que consegui */
     /* Basicamente vamos monitorar o teclado, se ligado, oculta botões /*/
@@ -68,6 +95,8 @@ export default class App extends Component {
 
   render() {
 
+    //console.log(this.state.instrucoes)
+
     return (
 
       <SafeAreaView style={styleApp.app}>
@@ -76,7 +105,7 @@ export default class App extends Component {
         
             <View style={styleApp.appMain}>
               
-              { /* Imagem superior */ }
+              { /* Imagem superior */ } 
               <View style={styleApp.imagem}>
                 <Image source={imagem} style={styleApp.image}/>
               </View>
@@ -92,10 +121,12 @@ export default class App extends Component {
                 <View style={{flex: 1}}>
                   {this.state.instrucoes.map((instrucao, index) => (
                     <AddInstrucao
-                      key={index}
-                      valor={instrucao}
+                      key={instrucao.id}
+                      cont={instrucao.cont}
+                      valor={instrucao.valor}
                       indice={index}
                       funcao={this.setInstrucao}
+                      deletar={this.delInstrucao}
                       onChange={(valor) => handleChange(valor, index)}
                     />
                   ))}
@@ -110,7 +141,7 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.goBack()} >
+                onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Instrucao', instrucaoArray: this.state.instrucoes, ingredienteArray: this.props.route.params.ingredienteArray, id: this.state.id, idIng: this.props.route.params.idIng } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
