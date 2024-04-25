@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { View, StyleSheet, TouchableWithoutFeedback, Modal, Text, TouchableOpacity, TextInput, Platform, FlatList } from 'react-native'
 import { ListItem, Avatar, Button } from '@rneui/themed'
 
+import Ionicons from 'react-native-vector-icons/Ionicons'
+
 // Componente baseado em classe
 export default class AddInstrucao extends Component {
 
@@ -24,7 +26,7 @@ export default class AddInstrucao extends Component {
         
             <View style={{justifyContent: 'center', paddingTop: 10, flexDirection: 'row'}}> 
 
-                  <Text style={{fontSize: 20, fontWeight: 'bold'}}> #{this.props.indice+1} </Text>
+                  <Text style={{fontSize: 20, fontWeight: 'bold'}}> #{this.props.cont+1} </Text>
 
                   <View style={styleApp.inputNomeIngrediente}>
                     <TouchableOpacity>
@@ -36,6 +38,12 @@ export default class AddInstrucao extends Component {
                         />
                      </TouchableOpacity>
                   </View>
+
+                  <TouchableOpacity style={{paddingTop: 10}}
+                    onPress={() => this.props.deletar(this.props.indice)}>
+                    <Ionicons name="trash" size={30} color={'black'} />
+                </TouchableOpacity>
+
               </View>
 
         )
@@ -45,7 +53,7 @@ export default class AddInstrucao extends Component {
 
 const styleApp = StyleSheet.create({
     inputNomeIngrediente: {
-        width: '80%' ,
+        width: '70%' ,
         height: 70,
         backgroundColor: 'white',
         borderRadius: 7,

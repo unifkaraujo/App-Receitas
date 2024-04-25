@@ -107,10 +107,9 @@ export default class App extends Component {
 
             <TouchableOpacity style={[styleApp.addButton]}
               activeOpacity={0.7}
-              onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Receita' } )} >
+              onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Receita', ingredienteArray: this.props.route.params.ingredienteArray, instrucaoArray: this.props.route.params.instrucaoArray, id: this.props.route.params.id, idIng: this.props.route.params.idIng } )} >
               <Ionicons name="arrow-forward" size={30} color={'white'} />
             </TouchableOpacity>
-
 
           </View>
         
