@@ -4,21 +4,16 @@ import { ListItem, Avatar, Button } from '@rneui/themed'
 
 const initialState = { 
     desc: '', 
-    categorias: [
-        {id: 1, descricao: 'Bolo'}, 
-        {id: 2, descricao: 'Sobremesa'}, 
-        {id: 3, descricao: 'Lanche'},
-        {id: 4, descricao: 'Lanche'},
-        {id: 5, descricao: 'Lanche'},
-        {id: 6, descricao: 'Lanche'},
-        {id: 7, descricao: 'Lanche'},
-        {id: 8, descricao: 'Lanche'},
-        {id: 9, descricao: 'Lanche'},
-        {id: 10, descricao: 'Lanche'},
-        {id: 11, descricao: 'Lanche'},
-        {id: 12, descricao: 'Lanche'},
-    ] 
+    categorias: [] 
 }
+
+/* Conexão com o banco de dados local SQLite */
+import SQLite from 'react-native-sqlite-storage';
+
+const db = SQLite.openDatabase({
+  name: 'myDatabase.db',
+  location: 'default',
+});
 
 // Componente baseado em classe
 export default class AddCategoria extends Component {
@@ -30,32 +25,89 @@ export default class AddCategoria extends Component {
     getItem = ({ item: categoria }) => {
         return (
     
-          <ListItem
+           <ListItem
     
-           key={categoria.id} 
-            //onPress={() => this.props.navigation.navigate('Receita', { receita: receita, view: 'Home' } )} 
-            >
-              
-              <ListItem.Content>
-                  <ListItem.Title>{categoria.descricao}</ListItem.Title>
-                  {/*<ListItem.Subtitle>{user.CPF}</ListItem.Subtitle>*/}
-                  
-              </ListItem.Content>
+                key={categoria.id} 
+                onPress={() => {
+                const newCategoria = {
+                    nome: categoria.nome,
+                    id: categoria.id
+                    }
+                    this.props.onSave && this.props.onSave(newCategoria)
+                    this.setState({ desc: '' })
+                }} >
+                    
+                <ListItem.Content>
+                <ListItem.Title>{categoria.nome}</ListItem.Title>
+                {/*<ListItem.Subtitle>{user.CPF}</ListItem.Subtitle>*/}
+                </ListItem.Content>
     
             </ListItem>
           
         )
       }
 
-    save = () => {
+      save = () => {
+  
+        db.transaction((tx) => {
 
-        const newCategoria = {
-            desc: this.state.desc,
-        }
+          tx.executeSql(
+            'INSERT INTO CATEGORIAS (NOME) VALUES (?)',
+            [this.state.desc],
+            (tx, results) => {
+              const categoriaId = results.insertId;
+              const newCategoria = {
+                nome: this.state.desc,
+                id: categoriaId
+              }
+              this.props.onSave && this.props.onSave(newCategoria)
+              this.setState({ desc: '' })
+            },
+            (tx, error) => {
+              console.error('Erro ao inserir categoria:', error);
+            }
+          )
+        })
+      }
 
-        this.props.onSave && this.props.onSave(newCategoria)
-        this.setState({ ...initialState })
 
+    localizarCategorias = () => {
+        db.transaction((tx) => {
+          tx.executeSql(
+            'SELECT * FROM CATEGORIAS',
+            [],
+            (tx, results) => {
+              const len = results.rows.length;
+              
+              const categorias = [] 
+
+              for (let i = 0; i < len; i++) {
+                const registro = results.rows.item(i);
+
+                const newCat = {
+                    id: registro.id,
+                    nome: registro.nome
+                }
+
+                categorias.push(newCat)
+                
+              }
+
+              this.setState({categorias})
+            
+            },
+            (error) => {
+              console.error('Erro ao localizar registros', error);
+            }
+          )
+        })
+    }
+
+    componentDidUpdate() {
+        this.localizarCategorias()
+    }
+
+    componentDidMount() {
     }
     
     render() {

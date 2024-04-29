@@ -112,7 +112,11 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Receita', { view: 'Ingrediente', instrucaoArray: this.props.route.params.instrucaoArray, ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, idIng: this.state.id } )} >
+                onPress={() => this.props.navigation.navigate('Receita', { view: 'Ingrediente', 
+                                                             instrucaoArray: this.props.route.params.instrucaoArray, 
+                                                             ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
+                                                             idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
+                                                             categoria: this.props.route.params.categoria } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -120,7 +124,11 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.addButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Instrucao', { view: 'Ingrediente', instrucaoArray: this.props.route.params.instrucaoArray, ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, idIng: this.state.id  } )} >
+                onPress={() => this.props.navigation.navigate('Instrucao', { view: 'Ingrediente', 
+                                                             instrucaoArray: this.props.route.params.instrucaoArray, 
+                                                             ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
+                                                             idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
+                                                             categoria: this.props.route.params.categoria } )} >
                 <Ionicons name="arrow-forward" size={30} color={'white'} />
               </TouchableOpacity>
             )}

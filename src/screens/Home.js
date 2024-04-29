@@ -5,18 +5,26 @@ import { ListItem, Avatar, Button } from '@rneui/themed'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import icone from '../../assets/imgs/logo.png'
 
+/* Conexão com o banco de dados local SQLite */
+import SQLite from 'react-native-sqlite-storage';
+
+const db = SQLite.openDatabase({
+  name: 'myDatabase.db',
+  location: 'default',
+});
+
 
 export default class App extends Component {
 
   state = {
     inputReceita: '',
-    receitas: [{id: 1, nome: 'Bolo de Banana', data: '2024-04-17'}, {id: 2, nome: 'Pudim', data: '2024-04-20'}],
+    receitas: [],
     receitasFilter: []
   }
 
   setInputReceita = async (inputReceita) => {
     await this.setState({ inputReceita })
-    this.localizarRegistros()
+    this.localizarReceitas()
   }
 
   setReceitas = (receitas) => {
@@ -25,15 +33,6 @@ export default class App extends Component {
 
   setReceitasFilter = (receitasFilter) => {
     this.setState({ receitasFilter })
-  }
-
-  localizarRegistros = () => {
-    
-    let receitasFilter = []
-    this.setReceitas(this.state.receitas) // Será a seleção do DB
-    receitasFilter = this.state.receitas.filter(receita => receita.nome.toLowerCase().includes(this.state.inputReceita.toLowerCase()))
-    this.setReceitasFilter(receitasFilter)
-
   }
 
   getItem = ({ item: receita }) => {
@@ -49,7 +48,7 @@ export default class App extends Component {
           
           <ListItem.Content>
               <ListItem.Title>{receita.nome}</ListItem.Title>
-              {/*<ListItem.Subtitle>{user.CPF}</ListItem.Subtitle>*/}
+              <ListItem.Subtitle>{receita.categoria}</ListItem.Subtitle>
               
           </ListItem.Content>
 
@@ -58,8 +57,131 @@ export default class App extends Component {
     )
   }
 
+  /* Funções do Banco de Dados */
+
+  criaTabela = () => {
+    db.transaction((tx) => {
+
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS RECEITAS (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, data datetime, categoria integer)',
+        [],
+      )
+
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS INGREDIENTES (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, receita integer)',
+        [],
+      )
+
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS INSTRUCOES (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, receita integer)',
+        [],
+      )  
+      
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS CATEGORIAS (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT)',
+        [],
+      ) 
+
+    })
+  }
+
+  deletaTabela = () => {
+    db.transaction((tx) => {
+
+      tx.executeSql(
+        'DROP TABLE RECEITAS',
+        [],
+      )
+
+      tx.executeSql(
+        'DROP TABLE INGREDIENTES',
+        [],
+      )
+
+      tx.executeSql(
+        'DROP TABLE INSTRUCOES',
+        [],
+      )
+
+      tx.executeSql(
+        'DROP TABLE CATEGORIAS',
+        [],
+      )
+
+    })
+  }
+
+  insereRegistro = () => {
+    db.transaction((tx) => {
+
+      tx.executeSql(
+        'INSERT INTO CATEGORIAS (NOME) VALUES ("Bolo")',
+        [],
+      )
+
+    })
+  }
+
+  localizarIngredientes = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM RECEITAS',
+        [],
+        (tx, results) => {
+          const len = results.rows.length;
+          
+          for (let i = 0; i < len; i++) {
+            const registro = results.rows.item(i);
+          }
+        
+        },
+        (error) => {
+          console.error('Erro ao localizar registros', error);
+        }
+      )
+    })
+  }
+
+  localizarReceitas = async () => {
+    await db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT RECEITAS.NOME, RECEITAS.ID, RECEITAS.DATA, CATEGORIAS.NOME AS categoria FROM RECEITAS LEFT JOIN CATEGORIAS ON CATEGORIAS.ID = RECEITAS.CATEGORIA',
+        [],
+        (tx, results) => {
+          const len = results.rows.length;
+
+          let receitas = []
+          let receitasFilter = []
+
+          for (let i = 0; i < len; i++) {
+            const registro = results.rows.item(i);
+
+            const novaReceita = {
+              id: registro.id,
+              nome: registro.nome,
+              data: registro.data,
+              categoria: registro.categoria
+            };
+
+            receitas.push(novaReceita);
+          }
+          this.setReceitas(receitas)
+          receitasFilter = receitas.filter(receita => receita.nome.toLowerCase().includes(this.state.inputReceita.toLowerCase()))
+          this.setReceitasFilter(receitasFilter)
+        },
+        (error) => {
+          console.error('Erro ao localizar registros', error);
+        }
+      )
+    })
+  }
+
   componentDidMount() {
-    this.localizarRegistros()
+    //this.deletaTabela()
+    //this.insereRegistro()
+    this.criaTabela()
+    this.localizarReceitas()
+    this.localizarIngredientes()
   }
 
   render() {

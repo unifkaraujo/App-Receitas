@@ -7,6 +7,14 @@ import imagem from '../../assets/imgs/addReceita.png'
 
 import AddInstrucao from '../components/AddInstrucao'
 
+/* Conexão com o banco de dados local SQLite */
+import SQLite from 'react-native-sqlite-storage';
+
+const db = SQLite.openDatabase({
+  name: 'myDatabase.db',
+  location: 'default',
+});
+
 const initialState = { 
   inputInstrucao: '',
   isKeyboardOpen: false
@@ -73,13 +81,59 @@ export default class App extends Component {
 
   }
 
+  salvar = () => {
+  
+    db.transaction((tx) => {
+
+      const ingredientes = this.props.route.params.ingredienteArray
+      const instrucoes = this.state.instrucoes
+      // Insere a receita na tabela de receitas
+      tx.executeSql(
+        'INSERT INTO RECEITAS (NOME, CATEGORIA) VALUES (?, ?)',
+        [this.props.route.params.nomeReceita, this.props.route.params.categoria.id],
+        (tx, results) => {
+          const receitaId = results.insertId; // Obtém o ID da receita inserida
+  
+          // Itera sobre os ingredientes e os insere na tabela de ingredientes
+          ingredientes.forEach((ingrediente) => {
+            tx.executeSql(
+              'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
+              [ingrediente.valor, receitaId],
+              (tx, results) => {
+                // Tratamento após a inserção de cada ingrediente, se necessário
+              },
+              (tx, error) => {
+                console.error('Erro ao inserir ingrediente:', error);
+                // Tratamento de erro, se necessário
+              }
+            );
+          });
+
+          instrucoes.forEach((instrucao) => {
+            tx.executeSql(
+              'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
+              [instrucao.valor, receitaId],
+              (tx, results) => {
+                // Tratamento após a inserção de cada ingrediente, se necessário
+              },
+              (tx, error) => {
+                console.error('Erro ao inserir ingrediente:', error);
+                // Tratamento de erro, se necessário
+              }
+            );
+          });
+
+        },
+        (tx, error) => {
+          console.error('Erro ao inserir receita:', error);
+          // Tratamento de erro, se necessário
+        }
+      );
+    });
+  };
+  
+
   componentDidMount() {
-
-    /*
-    if (this.props.route.params.instrucaoArray) {
-      this.setState({ instrucoes : this.props.route.params.instrucaoArray })
-    }*/
-
     /* Usando uma solução ruim, pois foi a unica que consegui */
     /* Basicamente vamos monitorar o teclado, se ligado, oculta botões /*/
     this.keyboardDidShowListener = Keyboard.addListener(
@@ -141,15 +195,31 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Instrucao', instrucaoArray: this.state.instrucoes, ingredienteArray: this.props.route.params.ingredienteArray, id: this.state.id, idIng: this.props.route.params.idIng } )} >
+                onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Instrucao', 
+                                                                             instrucaoArray: this.state.instrucoes, 
+                                                                             ingredienteArray: this.props.route.params.ingredienteArray, 
+                                                                             id: this.state.id, idIng: this.props.route.params.idIng,
+                                                                             nomeReceita: this.props.route.params.nomeReceita,
+                                                                             categoria: this.props.route.params.categoria } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
 
             {!this.state.isKeyboardOpen && (
-              <TouchableOpacity style={[styleApp.addButton]}
+              <TouchableOpacity style={[styleApp.saveButton]}
                 activeOpacity={0.7}
-                //onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Ingrediente' } )}
+                onPress={() =>{
+                  this.salvar()
+                  this.props.navigation.reset({
+                    routes: [{ 
+                    name: 'Home',
+                    params: {
+                      view: 'Instrucao'
+                      }
+                    }]
+                  })
+                  }
+                }
                 >
                 <Text style={{color: 'white', fontWeight: 'bold', fontSize: 17}}> Salvar </Text>
               </TouchableOpacity>
@@ -217,7 +287,7 @@ const styleApp = StyleSheet.create({
     backgroundColor: '#ECA457',
   },
 
-  addButton: {
+  saveButton: {
     position: 'absolute',
     right: 30,
     bottom: 30,

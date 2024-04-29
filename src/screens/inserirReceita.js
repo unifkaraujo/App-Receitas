@@ -1,28 +1,47 @@
 import React, {Component} from 'react'
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image, KeyboardAvoidingView, FlatList } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image, KeyboardAvoidingView, 
+  FlatList, Keyboard } from 'react-native'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
 
 import AddCategoria from '../components/AddCategoria'
 
-
 export default class App extends Component {
 
   state = {
-    inputReceita: '',
-    showAddCategoria: false
+    inputReceita: this.props.route.params.nomeReceita ? this.props.route.params.nomeReceita : '',
+    showAddCategoria: false,
+    isKeyboardOpen: false,
+    inputCategoria: this.props.route.params.categoria ? this.props.route.params.categoria : {}
   }
 
   setInputReceita = (inputReceita) => {
     this.setState({ inputReceita })
   }
 
-  addTask = () => {
-    console.log('entrou')
+  addCat = (newCategoria) => {
+    this.setState({ inputCategoria: newCategoria })
+    this.setState({ showAddCategoria: false })
+  }
+
+  setKeyboardOn = () => {
+    this.setState({ isKeyboardOpen: true });
+  };
+  
+  setKeyboardOff = () => {
+    this.setState({ isKeyboardOpen: false });
   }
 
   componentDidMount() {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      this.setKeyboardOn
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      this.setKeyboardOff
+    );
   }
 
   render() {
@@ -31,13 +50,9 @@ export default class App extends Component {
 
       <SafeAreaView style={styleApp.app}>
 
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
-
-             <AddCategoria isVisible={this.state.showAddCategoria} 
-                    onCancel={() => this.setState({ showAddCategoria: false }) }
-                    onSave={this.addTask} />
+          <AddCategoria isVisible={this.state.showAddCategoria} 
+              onCancel={() => this.setState({ showAddCategoria: false }) }
+              onSave={this.addCat} />
 
           <View style={styleApp.appMain}>
 
@@ -85,9 +100,8 @@ export default class App extends Component {
                     <View style={styleApp.inputCatReceita}>
                         <TouchableOpacity
                           onPress={() => this.setState({ showAddCategoria: true })} >
-                            { /* COPIAR O MODAL DO PROJETO DE TASKS, VAI SER NAQUELE MESMO ESTILO */ }
 
-                            <Text style={{fontSize: 16}}> Selecione aqui a categoria </Text>
+                            <Text style={{fontSize: 16}}> {this.state.inputCategoria.nome ? this.state.inputCategoria.nome : 'Selecione aqui a categoria' } </Text>
 
                         </TouchableOpacity>
                         <Ionicons name="search" size={25} style={{paddingLeft: 10}} color='black'/> 
@@ -97,23 +111,33 @@ export default class App extends Component {
 
             </View>
 
-
-            { /*  Botões de navegação */ }
-            <TouchableOpacity style={[styleApp.backButton]}
-              activeOpacity={0.7}
-              onPress={() => this.props.navigation.goBack()} >
-              <Ionicons name="arrow-back" size={30} color={'white'} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styleApp.addButton]}
-              activeOpacity={0.7}
-              onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Receita', ingredienteArray: this.props.route.params.ingredienteArray, instrucaoArray: this.props.route.params.instrucaoArray, id: this.props.route.params.id, idIng: this.props.route.params.idIng } )} >
-              <Ionicons name="arrow-forward" size={30} color={'white'} />
-            </TouchableOpacity>
-
           </View>
         
-        </KeyboardAvoidingView>
+          { /*  Botões de navegação */ }
+            {!this.state.isKeyboardOpen && (
+
+              <View>
+
+                <TouchableOpacity style={[styleApp.backButton]}
+                  activeOpacity={0.7}
+                  onPress={() => this.props.navigation.goBack()} >
+                  <Ionicons name="arrow-back" size={30} color={'white'} />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styleApp.addButton]}
+                  activeOpacity={0.7}
+                  
+                  onPress={() => this.props.navigation.navigate('Ingrediente', 
+                                { view: 'Receita', ingredienteArray: this.props.route.params.ingredienteArray, 
+                                instrucaoArray: this.props.route.params.instrucaoArray, id: this.props.route.params.id, 
+                                idIng: this.props.route.params.idIng, nomeReceita: this.state.inputReceita,
+                                categoria: this.state.inputCategoria } )} >
+                  
+                  <Ionicons name="arrow-forward" size={30} color={'white'} />
+                </TouchableOpacity>
+                
+              </View>
+            )}
       
       </SafeAreaView>
 
