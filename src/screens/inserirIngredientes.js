@@ -158,7 +158,7 @@ const styleApp = StyleSheet.create({
   },
 
   image: {
-    height: (Dimensions.get('window').width / 4) * 3,
+    height: (Dimensions.get('window').width / 6) * 4,
     resizeMode: 'contain',
   },
 
