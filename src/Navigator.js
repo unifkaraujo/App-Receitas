@@ -5,6 +5,7 @@ import Home from './screens/Home';
 import Receita from './screens/inserirReceita'
 import Ingrediente from './screens/inserirIngredientes'
 import Instrucao from './screens/inserirInstrucoes'
+import ViewReceita from './screens/viewReceita'
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ const Navigator = () => {
           <Stack.Screen name="Receita" component={Receita} />
           <Stack.Screen name="Ingrediente" component={Ingrediente} />
           <Stack.Screen name="Instrucao" component={Instrucao} />
+          <Stack.Screen name="ViewReceita" component={ViewReceita} />
         </Stack.Navigator>
       </NavigationContainer>
     );

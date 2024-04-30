@@ -42,7 +42,7 @@ export default class App extends Component {
 
        key={receita.id} 
         bottomDivider 
-        onPress={() => this.props.navigation.navigate('Receita', { receita: receita, view: 'Home' } )} 
+        onPress={() => this.props.navigation.navigate('ViewReceita', { receita: receita, view: 'Home' } )} 
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1 }}>
           <Avatar source={{uri: 'https://cdn.pixabay.com/photo/2024/03/05/18/43/taco-8615083_1280.png'}} />  
           
@@ -125,13 +125,14 @@ export default class App extends Component {
   localizarIngredientes = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM RECEITAS',
+        'SELECT * FROM INGREDIENTES',
         [],
         (tx, results) => {
           const len = results.rows.length;
           
           for (let i = 0; i < len; i++) {
             const registro = results.rows.item(i);
+            //console.log(registro)
           }
         
         },
