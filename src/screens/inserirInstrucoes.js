@@ -89,39 +89,43 @@ export default class App extends Component {
       const instrucoes = this.state.instrucoes
       // Insere a receita na tabela de receitas
       tx.executeSql(
-        'INSERT INTO RECEITAS (NOME, CATEGORIA) VALUES (?, ?)',
+        'INSERT INTO RECEITAS (NOME, CATEGORIA, DATA) VALUES (?, ?, datetime(\'now\'))',
         [this.props.route.params.nomeReceita, this.props.route.params.categoria.id],
         (tx, results) => {
           const receitaId = results.insertId; // Obtém o ID da receita inserida
   
           // Itera sobre os ingredientes e os insere na tabela de ingredientes
           ingredientes.forEach((ingrediente) => {
-            tx.executeSql(
-              'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
-              [ingrediente.valor, receitaId],
-              (tx, results) => {
-                // Tratamento após a inserção de cada ingrediente, se necessário
-              },
-              (tx, error) => {
-                console.error('Erro ao inserir ingrediente:', error);
-                // Tratamento de erro, se necessário
+            if (ingrediente.valor) {
+                tx.executeSql(
+                  'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
+                  [ingrediente.valor, receitaId],
+                  (tx, results) => {
+                    // Tratamento após a inserção de cada ingrediente, se necessário
+                  },
+                  (tx, error) => {
+                    console.error('Erro ao inserir ingrediente:', error);
+                    // Tratamento de erro, se necessário
+                  }
+                )
               }
-            );
-          });
+            })
 
           instrucoes.forEach((instrucao) => {
-            tx.executeSql(
-              'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
-              [instrucao.valor, receitaId],
-              (tx, results) => {
-                // Tratamento após a inserção de cada ingrediente, se necessário
-              },
-              (tx, error) => {
-                console.error('Erro ao inserir ingrediente:', error);
-                // Tratamento de erro, se necessário
+            if (instrucao.valor) {
+                tx.executeSql(
+                  'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
+                  [instrucao.valor, receitaId],
+                  (tx, results) => {
+                    // Tratamento após a inserção de cada ingrediente, se necessário
+                  },
+                  (tx, error) => {
+                    console.error('Erro ao inserir ingrediente:', error);
+                    // Tratamento de erro, se necessário
+                  }
+                )
               }
-            );
-          });
+            })
 
         },
         (tx, error) => {

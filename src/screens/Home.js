@@ -1,9 +1,12 @@
 import React, {Component} from 'react'
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image, FlatList } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, 
+  Dimensions , Image, FlatList, Modal, TouchableWithoutFeedback } from 'react-native'
 import { ListItem, Avatar, Button } from '@rneui/themed'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import icone from '../../assets/imgs/logo.png'
+
+import FilterModal from '../components/FilterModal'
 
 /* Conexão com o banco de dados local SQLite */
 import SQLite from 'react-native-sqlite-storage';
@@ -19,7 +22,9 @@ export default class App extends Component {
   state = {
     inputReceita: '',
     receitas: [],
-    receitasFilter: []
+    receitasFilter: [],
+    ordenacao: 'receitas.data desc',
+    ordenacaVisible: false
   }
 
   setInputReceita = async (inputReceita) => {
@@ -29,6 +34,12 @@ export default class App extends Component {
 
   setReceitas = (receitas) => {
     this.setState({ receitas })
+  }
+
+  setOrdenacao = (ordenacao) => {
+    this.setState({ ordenacao })
+    this.localizarReceitas()
+    this.setState({ ordenacaVisible: false })
   }
 
   setReceitasFilter = (receitasFilter) => {
@@ -144,9 +155,10 @@ export default class App extends Component {
   }
 
   localizarReceitas = async () => {
+
     await db.transaction((tx) => {
       tx.executeSql(
-        'SELECT RECEITAS.NOME, RECEITAS.ID, RECEITAS.DATA, CATEGORIAS.NOME AS categoria FROM RECEITAS LEFT JOIN CATEGORIAS ON CATEGORIAS.ID = RECEITAS.CATEGORIA',
+        'SELECT RECEITAS.NOME, RECEITAS.ID, RECEITAS.DATA, CATEGORIAS.NOME AS categoria FROM RECEITAS LEFT JOIN CATEGORIAS ON CATEGORIAS.ID = RECEITAS.CATEGORIA ORDER BY '+ this.state.ordenacao,
         [],
         (tx, results) => {
           const len = results.rows.length;
@@ -193,6 +205,12 @@ export default class App extends Component {
 
         <View style={styleApp.appMain}>
 
+        <FilterModal transparent={true} 
+            visible={this.state.ordenacaVisible}
+            onRequestClose={() => this.setState({ ordenacaVisible: false }) } 
+            funcOrdenacao={this.setOrdenacao} 
+            />
+
           { /* Header */ }
           <View style={styleApp.header}>
 
@@ -222,12 +240,8 @@ export default class App extends Component {
             <Text style={{fontSize: 16}}> 2 receitas </Text>
             <View style={styleApp.filtrosIcon}>
 
-              <TouchableOpacity>
-                <Ionicons name="filter" size={30} color='black' style={{paddingRight: 32}}/>
-              </TouchableOpacity>
-
-              <TouchableOpacity>
-                <Ionicons name="funnel" size={30} color='black' style={{paddingRight: 8}}/>
+              <TouchableOpacity onPress={() => this.setState({ ordenacaVisible: true })}>
+                <Ionicons name="filter" size={30} color='black' style={{paddingRight: 9}}/>
               </TouchableOpacity>
 
             </View>
@@ -269,7 +283,19 @@ const styleApp = StyleSheet.create({
   appMain: {
     flex: 1,
     paddingHorizontal: 10,
-    paddingVertical: 20
+    paddingTop: 20
+  },
+
+  modalApp: {
+    //flex: 1,
+    //backgroundColor: '#D5ECF0',
+  },
+
+  modalAppMain: {
+    //flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    alignItems: 'flex-end'
   },
 
   header: {
