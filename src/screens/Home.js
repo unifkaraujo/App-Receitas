@@ -24,7 +24,8 @@ export default class App extends Component {
     receitas: [],
     receitasFilter: [],
     ordenacao: 'receitas.data desc',
-    ordenacaVisible: false
+    ordenacaVisible: false,
+    qtdReceitas: 0
   }
 
   setInputReceita = async (inputReceita) => {
@@ -55,7 +56,7 @@ export default class App extends Component {
         bottomDivider 
         onPress={() => this.props.navigation.navigate('ViewReceita', { receita: receita, view: 'Home' } )} 
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1 }}>
-          <Avatar source={{uri: 'https://cdn.pixabay.com/photo/2024/03/05/18/43/taco-8615083_1280.png'}} />  
+          <Avatar source={{uri: 'https://cdn.pixabay.com/photo/2012/04/13/01/51/hamburger-31775_1280.png'}} />  
           
           <ListItem.Content>
               <ListItem.Title>{receita.nome}</ListItem.Title>
@@ -181,6 +182,8 @@ export default class App extends Component {
           this.setReceitas(receitas)
           receitasFilter = receitas.filter(receita => receita.nome.toLowerCase().includes(this.state.inputReceita.toLowerCase()))
           this.setReceitasFilter(receitasFilter)
+          var qtdReceitas = receitasFilter.length
+          this.setState({ qtdReceitas })
         },
         (error) => {
           console.error('Erro ao localizar registros', error);
@@ -237,7 +240,7 @@ export default class App extends Component {
 
           { /* Filtros */ }
           <View style={styleApp.filtros}>
-            <Text style={{fontSize: 16}}> 2 receitas </Text>
+            <Text style={{fontSize: 16}}> {this.state.qtdReceitas} {this.state.qtdReceitas == 1 ? 'receita' : 'receitas'} </Text>
             <View style={styleApp.filtrosIcon}>
 
               <TouchableOpacity onPress={() => this.setState({ ordenacaVisible: true })}>

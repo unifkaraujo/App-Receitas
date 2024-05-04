@@ -98,6 +98,30 @@ export default class App extends Component {
     )
   }
 
+  getItemPrep = ({ item: instrucao }) => {
+    return (
+
+      <ListItem
+
+       key={instrucao.id} 
+        bottomDivider 
+        containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1}}>
+
+        <Avatar 
+          source={{uri: 'https://cdn.pixabay.com/photo/2017/01/31/18/12/comic-characters-2026120_1280.png'}} 
+          />  
+          
+          <ListItem.Content>
+              <ListItem.Title>{instrucao.nome}</ListItem.Title>
+              {/*<ListItem.Subtitle>{receita.categoria}</ListItem.Subtitle>*/}
+              
+          </ListItem.Content>
+
+        </ListItem>
+      
+    )
+  }
+
   setKeyboardOn = () => {
     this.setState({ isKeyboardOpen: true });
   };
@@ -191,7 +215,7 @@ export default class App extends Component {
                   <FlatList 
                       keyExtractor={(instrucao) => instrucao.id.toString()}
                       data={this.state.instrucoes}
-                      renderItem={this.getItem}
+                      renderItem={this.getItemPrep}
                       contentContainerStyle={{ paddingVertical: 10 }}
                   />
 
@@ -246,7 +270,7 @@ const styleApp = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     fontSize: 25,
-    color: '#ECA457',
+    color: '#FF7F27',
   },
 
   flatlist: {
