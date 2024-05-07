@@ -75,7 +75,7 @@ export default class App extends Component {
     db.transaction((tx) => {
 
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS RECEITAS (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, data datetime, categoria integer)',
+        'CREATE TABLE IF NOT EXISTS RECEITAS (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, data datetime, categoria integer, imagem TEXT)',
         [],
       )
 
@@ -134,17 +134,18 @@ export default class App extends Component {
     })
   }
 
-  localizarIngredientes = () => {
+  logregistros = () => {
     db.transaction((tx) => {
+
       tx.executeSql(
-        'SELECT * FROM INGREDIENTES',
+        'SELECT * FROM RECEITAS',
         [],
         (tx, results) => {
           const len = results.rows.length;
           
           for (let i = 0; i < len; i++) {
             const registro = results.rows.item(i);
-            //console.log(registro)
+            console.log(registro)
           }
         
         },
@@ -159,7 +160,7 @@ export default class App extends Component {
 
     await db.transaction((tx) => {
       tx.executeSql(
-        'SELECT RECEITAS.NOME, RECEITAS.ID, RECEITAS.DATA, CATEGORIAS.NOME AS categoria FROM RECEITAS LEFT JOIN CATEGORIAS ON CATEGORIAS.ID = RECEITAS.CATEGORIA ORDER BY '+ this.state.ordenacao,
+        'SELECT RECEITAS.NOME, RECEITAS.ID, RECEITAS.DATA, CATEGORIAS.NOME AS categoria, RECEITAS.IMAGEM FROM RECEITAS LEFT JOIN CATEGORIAS ON CATEGORIAS.ID = RECEITAS.CATEGORIA ORDER BY '+ this.state.ordenacao,
         [],
         (tx, results) => {
           const len = results.rows.length;
@@ -174,7 +175,8 @@ export default class App extends Component {
               id: registro.id,
               nome: registro.nome,
               data: registro.data,
-              categoria: registro.categoria
+              categoria: registro.categoria,
+              image: registro.imagem
             };
 
             receitas.push(novaReceita);
@@ -197,7 +199,7 @@ export default class App extends Component {
     //this.insereRegistro()
     this.criaTabela()
     this.localizarReceitas()
-    this.localizarIngredientes()
+    //this.logregistros()
   }
 
   render() {

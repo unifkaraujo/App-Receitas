@@ -5,6 +5,16 @@ import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dime
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
 
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
+
+const options = {
+  title: 'Selecione uma foto',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+}
+
 import AddCategoria from '../components/AddCategoria'
 import AddIngrediente from '../components/AddIngrediente'
 
@@ -17,9 +27,29 @@ export default class App extends Component {
   state = {
     ...initialState,
     ingredientes: this.props.route.params.ingredienteArray ? this.props.route.params.ingredienteArray : [{'valor': '', 'id': 0}],
-    id: this.props.route.params.idIng ? this.props.route.params.idIng : 0
+    id: this.props.route.params.idIng ? this.props.route.params.idIng : 0,
+    image: this.props.route.params.image ? this.props.route.params.image : null,
   }
 
+  pickImage = (source) => {
+
+    const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
+    pickerFunction(options, (response) => {
+      console.log('teste')
+        console.log('Response = ', response);
+    
+        if (response.didCancel) {
+        console.log('User cancelled image picker');
+        } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+        } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        } else {
+            this.setState({ image: response.assets[0].uri })
+        }
+    })
+
+  }
 
   setIngredientes = (valor, indice) => {
     
@@ -78,9 +108,14 @@ export default class App extends Component {
             <View style={styleApp.appMain}>
               
               { /* Imagem superior */ }
-              <View style={styleApp.imagem}>
-                <Image source={imagem} style={styleApp.image}/>
-              </View>
+
+              <TouchableOpacity onPress={() => this.pickImage('galeria')}>
+
+                <View style={styleApp.imagem}>
+                    <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />
+                </View>
+
+              </TouchableOpacity>
 
               { /* Escolha dos ingredientes */ }
               <View style={{flex: 1}}>
@@ -116,7 +151,7 @@ export default class App extends Component {
                                                              instrucaoArray: this.props.route.params.instrucaoArray, 
                                                              ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
                                                              idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
-                                                             categoria: this.props.route.params.categoria } )} >
+                                                             categoria: this.props.route.params.categoria, image: this.state.image } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -128,7 +163,7 @@ export default class App extends Component {
                                                              instrucaoArray: this.props.route.params.instrucaoArray, 
                                                              ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
                                                              idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
-                                                             categoria: this.props.route.params.categoria } )} >
+                                                             categoria: this.props.route.params.categoria, image: this.state.image } )} >
                 <Ionicons name="arrow-forward" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -159,6 +194,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
+    width: (Dimensions.get('window').width / 2) * 2,
     resizeMode: 'contain',
   },
 

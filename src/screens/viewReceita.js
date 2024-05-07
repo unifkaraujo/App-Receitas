@@ -156,7 +156,7 @@ export default class App extends Component {
               
             { /* Imagem superior */ }
             <View style={styleApp.imagem}>
-                <Image source={imagem} style={styleApp.image}/>
+                <Image source={this.state.receita.image ? { uri: this.state.receita.image } : imagem} style={styleApp.image} />
             </View>
 
             <View style={{alignItems: 'center',}}> 
@@ -263,6 +263,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
+    width: (Dimensions.get('window').width / 2) * 2,
     resizeMode: 'contain',
   },
 
