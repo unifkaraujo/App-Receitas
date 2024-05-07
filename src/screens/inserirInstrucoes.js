@@ -5,6 +5,16 @@ import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dime
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
 
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
+
+const options = {
+  title: 'Selecione uma foto',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+}
+
 import AddInstrucao from '../components/AddInstrucao'
 
 /* Conexão com o banco de dados local SQLite */
@@ -25,7 +35,28 @@ export default class App extends Component {
   state = {
     ...initialState,
     instrucoes: this.props.route.params.instrucaoArray ? this.props.route.params.instrucaoArray : [{'valor': '', 'id': 0, 'cont': 0}],
-    id: this.props.route.params.id ? this.props.route.params.id : 0
+    id: this.props.route.params.id ? this.props.route.params.id : 0,
+    image: this.props.route.params.image ? this.props.route.params.image : null,
+  }
+
+  pickImage = (source) => {
+
+    const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
+    pickerFunction(options, (response) => {
+      console.log('teste')
+        console.log('Response = ', response);
+    
+        if (response.didCancel) {
+        console.log('User cancelled image picker');
+        } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+        } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        } else {
+            this.setState({ image: response.assets[0].uri })
+        }
+    })
+
   }
 
   setInputIntrucao = (inputInstrucao) => {
@@ -87,25 +118,22 @@ export default class App extends Component {
 
       const ingredientes = this.props.route.params.ingredienteArray
       const instrucoes = this.state.instrucoes
-      // Insere a receita na tabela de receitas
+
       tx.executeSql(
-        'INSERT INTO RECEITAS (NOME, CATEGORIA, DATA) VALUES (?, ?, datetime(\'now\'))',
-        [this.props.route.params.nomeReceita, this.props.route.params.categoria.id],
+        'INSERT INTO RECEITAS (NOME, CATEGORIA, DATA, IMAGEM) VALUES (?, ?, datetime(\'now\'), ?)',
+        [this.props.route.params.nomeReceita, this.props.route.params.categoria.id, this.state.image],
         (tx, results) => {
           const receitaId = results.insertId; // Obtém o ID da receita inserida
   
-          // Itera sobre os ingredientes e os insere na tabela de ingredientes
           ingredientes.forEach((ingrediente) => {
             if (ingrediente.valor) {
                 tx.executeSql(
                   'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
                   [ingrediente.valor, receitaId],
                   (tx, results) => {
-                    // Tratamento após a inserção de cada ingrediente, se necessário
                   },
                   (tx, error) => {
                     console.error('Erro ao inserir ingrediente:', error);
-                    // Tratamento de erro, se necessário
                   }
                 )
               }
@@ -117,11 +145,9 @@ export default class App extends Component {
                   'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
                   [instrucao.valor, receitaId],
                   (tx, results) => {
-                    // Tratamento após a inserção de cada ingrediente, se necessário
                   },
                   (tx, error) => {
                     console.error('Erro ao inserir ingrediente:', error);
-                    // Tratamento de erro, se necessário
                   }
                 )
               }
@@ -130,7 +156,6 @@ export default class App extends Component {
         },
         (tx, error) => {
           console.error('Erro ao inserir receita:', error);
-          // Tratamento de erro, se necessário
         }
       );
     });
@@ -163,10 +188,15 @@ export default class App extends Component {
         
             <View style={styleApp.appMain}>
               
-              { /* Imagem superior */ } 
-              <View style={styleApp.imagem}>
-                <Image source={imagem} style={styleApp.image}/>
-              </View>
+              { /* Imagem superior */ }
+
+              <TouchableOpacity onPress={() => this.pickImage('galeria')}>
+
+                  <View style={styleApp.imagem}>
+                      <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />
+                  </View>
+
+              </TouchableOpacity>
 
               { /* Escolha dos ingredientes */ }
               <View style={{flex: 1}}>
@@ -204,7 +234,7 @@ export default class App extends Component {
                                                                              ingredienteArray: this.props.route.params.ingredienteArray, 
                                                                              id: this.state.id, idIng: this.props.route.params.idIng,
                                                                              nomeReceita: this.props.route.params.nomeReceita,
-                                                                             categoria: this.props.route.params.categoria } )} >
+                                                                             categoria: this.props.route.params.categoria, image: this.state.image } )} >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -255,6 +285,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
+    width: (Dimensions.get('window').width / 2) * 2,
     resizeMode: 'contain',
   },
 

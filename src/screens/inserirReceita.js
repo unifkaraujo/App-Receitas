@@ -5,6 +5,16 @@ import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dime
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
 
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+
+const options = {
+  title: 'Selecione uma foto',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+};
+
 import AddCategoria from '../components/AddCategoria'
 
 export default class App extends Component {
@@ -13,7 +23,28 @@ export default class App extends Component {
     inputReceita: this.props.route.params.nomeReceita ? this.props.route.params.nomeReceita : '',
     showAddCategoria: false,
     isKeyboardOpen: false,
-    inputCategoria: this.props.route.params.categoria ? this.props.route.params.categoria : {}
+    inputCategoria: this.props.route.params.categoria ? this.props.route.params.categoria : {},
+    image: this.props.route.params.image ? this.props.route.params.image : null,
+  }
+
+  pickImage = (source) => {
+
+    const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
+    pickerFunction(options, (response) => {
+      console.log('teste')
+        console.log('Response = ', response);
+    
+        if (response.didCancel) {
+        console.log('User cancelled image picker');
+        } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+        } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        } else {
+            this.setState({ image: response.assets[0].uri })
+        }
+    })
+
   }
 
   setInputReceita = (inputReceita) => {
@@ -57,10 +88,14 @@ export default class App extends Component {
           <View style={styleApp.appMain}>
 
             { /* Imagem superior */ }
-            <View style={styleApp.imagem}>
-              <Image source={imagem} style={styleApp.image}/>
 
-            </View>
+            <TouchableOpacity onPress={() => this.pickImage('camera')}>
+
+              <View style={styleApp.imagem}>
+                  <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />
+              </View>
+
+           </TouchableOpacity>
 
             { /* Input para inserir nome da receita */ }
             <View>
@@ -101,7 +136,7 @@ export default class App extends Component {
                         <TouchableOpacity
                           onPress={() => this.setState({ showAddCategoria: true })} >
 
-                            <Text style={{fontSize: 16}}> {this.state.inputCategoria.nome ? this.state.inputCategoria.nome : 'Selecione aqui a categoria' } </Text>
+                            <Text style={{fontSize: 16, color: '#999999'}}> {this.state.inputCategoria.nome ? this.state.inputCategoria.nome : 'Selecione aqui a categoria' } </Text>
 
                         </TouchableOpacity>
                         <Ionicons name="search" size={25} style={{paddingLeft: 10}} color='black'/> 
@@ -131,7 +166,7 @@ export default class App extends Component {
                                 { view: 'Receita', ingredienteArray: this.props.route.params.ingredienteArray, 
                                 instrucaoArray: this.props.route.params.instrucaoArray, id: this.props.route.params.id, 
                                 idIng: this.props.route.params.idIng, nomeReceita: this.state.inputReceita,
-                                categoria: this.state.inputCategoria } )} >
+                                categoria: this.state.inputCategoria, image: this.state.image } )} >
                   
                   <Ionicons name="arrow-forward" size={30} color={'white'} />
                 </TouchableOpacity>
@@ -161,11 +196,12 @@ const styleApp = StyleSheet.create({
   },
 
   imagem: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
+    width: (Dimensions.get('window').width / 2) * 2,
     resizeMode: 'contain',
   },
 
