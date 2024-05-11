@@ -5,6 +5,8 @@ import { ListItem, Avatar, Button } from '@rneui/themed'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
+import icon_ingr from '../../assets/imgs/icon_ingr.png'
+import icon_prep from '../../assets/imgs/icon_prep.png'
 
 /* Conexão com o banco de dados local SQLite */
 import SQLite from 'react-native-sqlite-storage';
@@ -21,6 +23,30 @@ export default class App extends Component {
     ingredientes: [],
     instrucoes: [],
     showIngredientes: true
+  }
+
+  deletarReceita = () => {
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        'DELETE FROM RECEITAS WHERE ID = ?',
+        [this.state.receita.id],
+        (tx, results) => {
+          
+          this.props.navigation.reset({
+            routes: [{ 
+            name: 'Home',
+            params: {
+              view: 'ViewReceita'
+            } }]
+          })
+          
+        },
+        (error) => {
+          console.error('Erro ao localizar registros', error);
+        }
+      )
+    })
   }
 
   localizarIngredientes = () => {
@@ -84,7 +110,7 @@ export default class App extends Component {
         bottomDivider 
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1 }}>
           <Avatar 
-          source={{uri: 'https://cdn.pixabay.com/photo/2014/12/21/23/34/swiss-cheese-575541_1280.png'}} 
+          source={icon_ingr} 
           />  
           
           <ListItem.Content>
@@ -108,7 +134,7 @@ export default class App extends Component {
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1}}>
 
         <Avatar 
-          source={{uri: 'https://cdn.pixabay.com/photo/2017/01/31/18/12/comic-characters-2026120_1280.png'}} 
+          source={icon_prep} 
           />  
           
           <ListItem.Content>
@@ -263,7 +289,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
-    width: (Dimensions.get('window').width / 2) * 2,
+    width: (Dimensions.get('window').width / 2),
     resizeMode: 'contain',
   },
 

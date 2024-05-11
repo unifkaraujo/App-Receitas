@@ -34,10 +34,7 @@ export default class App extends Component {
   pickImage = (source) => {
 
     const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
-    pickerFunction(options, (response) => {
-      console.log('teste')
-        console.log('Response = ', response);
-    
+    pickerFunction(options, (response) => {    
         if (response.didCancel) {
         console.log('User cancelled image picker');
         } else if (response.error) {
@@ -109,7 +106,7 @@ export default class App extends Component {
               
               { /* Imagem superior */ }
 
-              <TouchableOpacity onPress={() => this.pickImage('galeria')}>
+              <TouchableOpacity onPress={() => this.pickImage('camera')}>
 
                 <View style={styleApp.imagem}>
                     <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />
@@ -147,11 +144,18 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Receita', { view: 'Ingrediente', 
-                                                             instrucaoArray: this.props.route.params.instrucaoArray, 
-                                                             ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
-                                                             idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
-                                                             categoria: this.props.route.params.categoria, image: this.state.image } )} >
+                onPress={() => this.props.navigation.reset({
+                  routes: [{ 
+                    name: 'Receita',
+                    params: {
+                      view: 'Ingrediente',
+                      instrucaoArray: this.props.route.params.instrucaoArray, 
+                      ingredienteArray: this.state.ingredientes, id: this.props.route.params.id, 
+                      idIng: this.state.id, nomeReceita: this.props.route.params.nomeReceita,
+                      categoria: this.props.route.params.categoria, image: this.state.image
+                      }
+                    }]
+                  }) } >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -194,7 +198,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
-    width: (Dimensions.get('window').width / 2) * 2,
+    width: (Dimensions.get('window').width / 2),
     resizeMode: 'contain',
   },
 
