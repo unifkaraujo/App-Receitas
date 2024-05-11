@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Dimensions , Image, 
-  KeyboardAvoidingView, FlatList, Button, ScrollView, Keyboard } from 'react-native'
+  KeyboardAvoidingView, FlatList, Button, ScrollView, Keyboard, 
+  Alert} from 'react-native'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import imagem from '../../assets/imgs/addReceita.png'
@@ -43,9 +44,6 @@ export default class App extends Component {
 
     const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
     pickerFunction(options, (response) => {
-      console.log('teste')
-        console.log('Response = ', response);
-    
         if (response.didCancel) {
         console.log('User cancelled image picker');
         } else if (response.error) {
@@ -112,54 +110,74 @@ export default class App extends Component {
 
   }
 
-  salvar = () => {
-  
-    db.transaction((tx) => {
+  salvar = async () => {
 
-      const ingredientes = this.props.route.params.ingredienteArray
-      const instrucoes = this.state.instrucoes
+    console.log(this.props.route.params.nomeReceita)
 
-      tx.executeSql(
-        'INSERT INTO RECEITAS (NOME, CATEGORIA, DATA, IMAGEM) VALUES (?, ?, datetime(\'now\'), ?)',
-        [this.props.route.params.nomeReceita, this.props.route.params.categoria.id, this.state.image],
-        (tx, results) => {
-          const receitaId = results.insertId; // Obtém o ID da receita inserida
-  
-          ingredientes.forEach((ingrediente) => {
-            if (ingrediente.valor) {
-                tx.executeSql(
-                  'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
-                  [ingrediente.valor, receitaId],
-                  (tx, results) => {
-                  },
-                  (tx, error) => {
-                    console.error('Erro ao inserir ingrediente:', error);
+   if (!this.props.route.params.nomeReceita || this.props.route.params.nomeReceita == '') {
+      Alert.alert('Erro', 'Nome da receita não foi digitado')
+      return 
+    }
+
+    else {
+
+        await db.transaction((tx) => {
+
+          const ingredientes = this.props.route.params.ingredienteArray
+          const instrucoes = this.state.instrucoes
+
+          tx.executeSql(
+            'INSERT INTO RECEITAS (NOME, CATEGORIA, DATA, IMAGEM) VALUES (?, ?, datetime(\'now\'), ?)',
+            [this.props.route.params.nomeReceita, this.props.route.params.categoria.id, this.state.image],
+            (tx, results) => {
+              const receitaId = results.insertId; // Obtém o ID da receita inserida
+      
+              ingredientes.forEach((ingrediente) => {
+                if (ingrediente.valor) {
+                    tx.executeSql(
+                      'INSERT INTO INGREDIENTES (NOME, RECEITA) VALUES (?, ?)',
+                      [ingrediente.valor, receitaId],
+                      (tx, results) => {
+                      },
+                      (tx, error) => {
+                        console.error('Erro ao inserir ingrediente:', error);
+                      }
+                    )
                   }
-                )
-              }
-            })
+                })
 
-          instrucoes.forEach((instrucao) => {
-            if (instrucao.valor) {
-                tx.executeSql(
-                  'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
-                  [instrucao.valor, receitaId],
-                  (tx, results) => {
-                  },
-                  (tx, error) => {
-                    console.error('Erro ao inserir ingrediente:', error);
+              instrucoes.forEach((instrucao) => {
+                if (instrucao.valor) {
+                    tx.executeSql(
+                      'INSERT INTO INSTRUCOES (NOME, RECEITA) VALUES (?, ?)',
+                      [instrucao.valor, receitaId],
+                      (tx, results) => {
+                      },
+                      (tx, error) => {
+                        console.error('Erro ao inserir ingrediente:', error);
+                      }
+                    )
                   }
-                )
-              }
-            })
+                })
 
-        },
-        (tx, error) => {
-          console.error('Erro ao inserir receita:', error);
-        }
-      );
-    });
-  };
+            },
+            (tx, error) => {
+              console.error('Erro ao inserir receita:', error);
+            }
+          )
+        })
+
+      this.props.navigation.reset({
+          routes: [{ 
+          name: 'Home',
+          params: {
+            view: 'Instrucao'
+            }
+          }]
+        })
+
+    }
+  }
   
 
   componentDidMount() {
@@ -190,7 +208,7 @@ export default class App extends Component {
               
               { /* Imagem superior */ }
 
-              <TouchableOpacity onPress={() => this.pickImage('galeria')}>
+              <TouchableOpacity onPress={() => this.pickImage('camera')}>
 
                   <View style={styleApp.imagem}>
                       <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />
@@ -229,12 +247,19 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.backButton]}
                 activeOpacity={0.7}
-                onPress={() => this.props.navigation.navigate('Ingrediente', { view: 'Instrucao', 
-                                                                             instrucaoArray: this.state.instrucoes, 
-                                                                             ingredienteArray: this.props.route.params.ingredienteArray, 
-                                                                             id: this.state.id, idIng: this.props.route.params.idIng,
-                                                                             nomeReceita: this.props.route.params.nomeReceita,
-                                                                             categoria: this.props.route.params.categoria, image: this.state.image } )} >
+                onPress={() => this.props.navigation.reset({
+                  routes: [{ 
+                    name: 'Ingrediente',
+                    params: {
+                      view: 'Instrucao',
+                      instrucaoArray: this.state.instrucoes, 
+                      ingredienteArray: this.props.route.params.ingredienteArray, 
+                      id: this.state.id, idIng: this.props.route.params.idIng,
+                      nomeReceita: this.props.route.params.nomeReceita,
+                      categoria: this.props.route.params.categoria, image: this.state.image
+                      }
+                    }]
+                  }) } >
                 <Ionicons name="arrow-back" size={30} color={'white'} />
               </TouchableOpacity>
             )}
@@ -242,18 +267,7 @@ export default class App extends Component {
             {!this.state.isKeyboardOpen && (
               <TouchableOpacity style={[styleApp.saveButton]}
                 activeOpacity={0.7}
-                onPress={() =>{
-                  this.salvar()
-                  this.props.navigation.reset({
-                    routes: [{ 
-                    name: 'Home',
-                    params: {
-                      view: 'Instrucao'
-                      }
-                    }]
-                  })
-                  }
-                }
+                onPress={() => this.salvar() }
                 >
                 <Text style={{color: 'white', fontWeight: 'bold', fontSize: 17}}> Salvar </Text>
               </TouchableOpacity>
@@ -285,7 +299,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
-    width: (Dimensions.get('window').width / 2) * 2,
+    width: (Dimensions.get('window').width / 2),
     resizeMode: 'contain',
   },
 

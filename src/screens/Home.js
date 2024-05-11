@@ -5,6 +5,7 @@ import { ListItem, Avatar, Button } from '@rneui/themed'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import icone from '../../assets/imgs/logo.png'
+import icon_home from '../../assets/imgs/icon_home.png'
 
 import FilterModal from '../components/FilterModal'
 
@@ -56,7 +57,7 @@ export default class App extends Component {
         bottomDivider 
         onPress={() => this.props.navigation.navigate('ViewReceita', { receita: receita, view: 'Home' } )} 
         containerStyle={{ backgroundColor: 'white', borderRadius: 10, borderWidth: 0.1 }}>
-          <Avatar source={{uri: 'https://cdn.pixabay.com/photo/2012/04/13/01/51/hamburger-31775_1280.png'}} />  
+          <Avatar source={icon_home} />  
           
           <ListItem.Content>
               <ListItem.Title>{receita.nome}</ListItem.Title>
@@ -222,7 +223,7 @@ export default class App extends Component {
             <Image source={icone} style={styleApp.image}/>
 
             <View style={styleApp.pesquisa}>
-              <TouchableOpacity>
+              <TouchableOpacity >
                 <TextInput 
                   placeholder="Buscar Receita..."
                   style={{fontSize: 16}}
@@ -230,7 +231,7 @@ export default class App extends Component {
                   onChangeText={this.setInputReceita}
                 />
               </TouchableOpacity>
-              <Ionicons name="search" size={25} style={{paddingTop: 11}} color='black'/> 
+              <Ionicons name="search" size={25} color='black'/> 
               
             </View>
 
@@ -318,6 +319,7 @@ const styleApp = StyleSheet.create({
     textAlign: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center'
   },
 
   image: {

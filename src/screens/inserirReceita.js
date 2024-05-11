@@ -30,10 +30,7 @@ export default class App extends Component {
   pickImage = (source) => {
 
     const pickerFunction = source === 'camera' ? launchCamera : launchImageLibrary;
-    pickerFunction(options, (response) => {
-      console.log('teste')
-        console.log('Response = ', response);
-    
+    pickerFunction(options, (response) => {    
         if (response.didCancel) {
         console.log('User cancelled image picker');
         } else if (response.error) {
@@ -155,7 +152,7 @@ export default class App extends Component {
 
                 <TouchableOpacity style={[styleApp.backButton]}
                   activeOpacity={0.7}
-                  onPress={() => this.props.navigation.goBack()} >
+                  onPress={() => this.props.navigation.reset({ routes: [{ name: 'Home'}] }) } >
                   <Ionicons name="arrow-back" size={30} color={'white'} />
                 </TouchableOpacity>
 
@@ -201,7 +198,7 @@ const styleApp = StyleSheet.create({
 
   image: {
     height: (Dimensions.get('window').width / 6) * 4,
-    width: (Dimensions.get('window').width / 2) * 2,
+    width: (Dimensions.get('window').width / 2),
     resizeMode: 'contain',
   },
 
@@ -231,6 +228,7 @@ const styleApp = StyleSheet.create({
     borderRadius: 7,
     paddingHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center'
   },
 
   inputCatReceita: {

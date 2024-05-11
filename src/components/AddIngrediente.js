@@ -57,5 +57,6 @@ const styleApp = StyleSheet.create({
         borderRadius: 7,
         paddingHorizontal: 0,
         alignItems: 'center',
+        justifyContent: 'center',
       },
 })
