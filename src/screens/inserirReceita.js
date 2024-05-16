@@ -86,7 +86,7 @@ export default class App extends Component {
 
             { /* Imagem superior */ }
 
-            <TouchableOpacity onPress={() => this.pickImage('camera')}>
+            <TouchableOpacity onPress={() => this.pickImage('galeria')}>
 
               <View style={styleApp.imagem}>
                   <Image source={this.state.image ? { uri: this.state.image } : imagem} style={styleApp.image} />

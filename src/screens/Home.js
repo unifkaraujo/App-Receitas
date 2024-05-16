@@ -139,7 +139,7 @@ export default class App extends Component {
     db.transaction((tx) => {
 
       tx.executeSql(
-        'SELECT * FROM RECEITAS',
+        'SELECT * FROM ingredientes',
         [],
         (tx, results) => {
           const len = results.rows.length;
